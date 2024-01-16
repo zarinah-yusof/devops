@@ -12,7 +12,7 @@ pipeline{
 	DOCKER_USER = "sitizarinahmohdyusof"
 	DOCKER_PASS = 'docker-hub'
 	IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
-	IMAGE_TAG = "${RELEASE}" + "-" + "${BUILD_NUMBER}"
+	IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
     }
     
     stages{
@@ -41,6 +41,22 @@ pipeline{
 	        sh "mvn test"
 	    }
 	}
+
+        stage("Build & Push Docker Image") {
+            steps {
+                script {
+                    docker.withRegistry('',DOCKER_PASS) {
+                        docker_image = docker.build "${IMAGE_NAME}"
+                    }
+
+                    docker.withRegistry('',DOCKER_PASS) {
+                        docker_image.push("${IMAGE_TAG}")
+                        docker_image.push('latest')
+                    }
+                }
+            }
+
+        }
     }
 
 }
